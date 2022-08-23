@@ -11,5 +11,5 @@ Inspired by [crunchvanity](https://github.com/hrkrshnn/crunchvanity) which is wr
 
 ``` shell
 $ go install github.com/Jeiwan/vanitycruncher-go@latest
-$ vanitycruncher
+$ vanitycruncher-go
 ```
