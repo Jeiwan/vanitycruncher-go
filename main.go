@@ -30,9 +30,8 @@ func main() {
 	}
 
 	prefix := abi.Methods[methodName].ID
+	digest := mustDecodeHash("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528")
 	signature := uint256.NewInt(0)
-	var digest [32]byte
-	hex.Decode(digest[:], []byte("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528"))
 
 	var calldata []byte
 
@@ -58,4 +57,12 @@ func main() {
 	}
 
 	fmt.Printf("Done in %s: %x\n", time.Since(start), signature.Bytes())
+}
+
+func mustDecodeHash(s string) (hash [32]byte) {
+	_, err := hex.Decode(hash[:], []byte(s))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
 }
