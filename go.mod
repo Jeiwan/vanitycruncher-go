@@ -1,4 +1,4 @@
-module jeiwan.net/vanitycruncher
+module github.com/Jeiwan/vanitycruncher-go
 
 go 1.18
 
