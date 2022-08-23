@@ -41,7 +41,7 @@ func main() {
 	sha256 := sha256.New()
 	calldata := make([]byte, calldataSize)
 
-	for {
+	for !bytes.HasPrefix(sha256.Sum(nil), prefix) {
 		calldata, err = inputs.Pack(digest, signature.Bytes())
 		if err != nil {
 			log.Fatal(fmt.Errorf("failed to pack calldata: %w", err))
@@ -52,11 +52,6 @@ func main() {
 		sha256.Reset()
 		sha256.Write(data)
 
-		if bytes.HasPrefix(sha256.Sum(nil), prefix) {
-			fmt.Printf("Done in %s: %x\n", time.Since(start), signature.Bytes())
-			break
-		}
-
 		cnt++
 		signature.Add(signature, uintOne)
 
@@ -65,4 +60,5 @@ func main() {
 		}
 	}
 
+	fmt.Printf("Done in %s: %x\n", time.Since(start), signature.Bytes())
 }
