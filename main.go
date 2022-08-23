@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	calldataSize = 32 + 32 + 32 + 32 // digest + dynamic array (position + length + data)
+	methodName = "isValidSignature"
 )
 
 var (
@@ -24,33 +24,30 @@ var (
 func main() {
 	var err error
 
-	abi, _ := abi.JSON(strings.NewReader(IERC1271ABI))
-	inputs := abi.Methods["isValidSignature"].Inputs
+	abi, err := abi.JSON(strings.NewReader(IERC1271ABI))
+	if err != nil {
+		log.Fatal(fmt.Errorf("failed to parse ABI: %w", err))
+	}
 
-	prefix, _ := hex.DecodeString("1626ba7e")
+	prefix := abi.Methods[methodName].ID
+	signature := uint256.NewInt(0)
 	var digest [32]byte
 	hex.Decode(digest[:], []byte("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528"))
 
-	signature := uint256.NewInt(0)
+	var calldata []byte
 
-	data := make([]byte, len(prefix)+calldataSize)
-	copy(data, prefix)
-
-	start := time.Now()
 	cnt := 0
 	sha256 := sha256.New()
-	calldata := make([]byte, calldataSize)
+	start := time.Now()
 
 	for !bytes.HasPrefix(sha256.Sum(nil), prefix) {
-		calldata, err = inputs.Pack(digest, signature.Bytes())
+		calldata, err = abi.Pack(methodName, digest, signature.Bytes())
 		if err != nil {
 			log.Fatal(fmt.Errorf("failed to pack calldata: %w", err))
 		}
 
-		copy(data[len(prefix):], calldata)
-
 		sha256.Reset()
-		sha256.Write(data)
+		sha256.Write(calldata)
 
 		cnt++
 		signature.Add(signature, uintOne)
