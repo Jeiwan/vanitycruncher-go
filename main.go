@@ -29,12 +29,12 @@ func main() {
 
 	prefix, _ := hex.DecodeString("1626ba7e")
 	var digest [32]byte
-	_, _ = hex.Decode(digest[:], []byte("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528"))
+	hex.Decode(digest[:], []byte("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528"))
 
 	signature := uint256.NewInt(0)
 
-	input := make([]byte, len(prefix)+calldataSize)
-	copy(input, prefix)
+	data := make([]byte, len(prefix)+calldataSize)
+	copy(data, prefix)
 
 	start := time.Now()
 	cnt := 0
@@ -47,10 +47,10 @@ func main() {
 			log.Fatal(fmt.Errorf("failed to pack calldata: %w", err))
 		}
 
-		copy(input[len(prefix):], calldata)
+		copy(data[len(prefix):], calldata)
 
 		sha256.Reset()
-		sha256.Write(input)
+		sha256.Write(data)
 
 		if bytes.HasPrefix(sha256.Sum(nil), prefix) {
 			fmt.Printf("Done in %s: %x\n", time.Since(start), signature.Bytes())
