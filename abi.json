@@ -1,0 +1,24 @@
+[
+  {
+    "name": "sha256",
+    "type": "function",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "name": "digest",
+        "type": "bytes32"
+      },
+      {
+        "name": "signature",
+        "type": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "hash",
+        "type": "bytes32"
+      }
+    ]
+  }
+]
