@@ -6,41 +6,51 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"math/big"
 	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/holiman/uint256"
+)
+
+const (
+	calldataSize = 32 + 32 + 32 + 32 // digest + dynamic array (position + length + data)
 )
 
 var (
-	bigOne = big.NewInt(1)
+	uintOne = uint256.NewInt(1)
 )
 
 func main() {
-	abi, _ := abi.JSON(strings.NewReader(IERC1271ABI))
+	var err error
 
+	abi, _ := abi.JSON(strings.NewReader(IERC1271ABI))
 	inputs := abi.Methods["isValidSignature"].Inputs
 
 	prefix, _ := hex.DecodeString("1626ba7e")
-
 	var digest [32]byte
 	_, _ = hex.Decode(digest[:], []byte("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528"))
 
-	signature := big.NewInt(0)
+	signature := uint256.NewInt(0)
+
+	input := make([]byte, len(prefix)+calldataSize)
+	copy(input, prefix)
 
 	start := time.Now()
 	cnt := 0
 	sha256 := sha256.New()
+	calldata := make([]byte, calldataSize)
 
 	for {
-		calldata, err := inputs.Pack(digest, signature.Bytes())
+		calldata, err = inputs.Pack(digest, signature.Bytes())
 		if err != nil {
 			log.Fatal(fmt.Errorf("failed to pack calldata: %w", err))
 		}
 
+		copy(input[len(prefix):], calldata)
+
 		sha256.Reset()
-		sha256.Write(append(prefix, calldata...))
+		sha256.Write(input)
 
 		if bytes.HasPrefix(sha256.Sum(nil), prefix) {
 			fmt.Printf("Done in %s: %x\n", time.Since(start), signature.Bytes())
@@ -48,7 +58,7 @@ func main() {
 		}
 
 		cnt++
-		signature.Add(signature, bigOne)
+		signature.Add(signature, uintOne)
 
 		if cnt%10_000_000 == 0 {
 			fmt.Printf("%s: %d\n", time.Since(start), cnt)
